@@ -152,7 +152,7 @@ def n_of_sentences(data):
 ''' Code execute block. '''
 ## Get list of tokenized test files.
 ## Expected path: '../input/test/tokenized'
-err = os.chdir('../input/test/tokenized')
+err = os.chdir('/input/test/tokenized')
 path = os.getcwd()
 testfileset = os.listdir(path)
 
@@ -173,5 +173,6 @@ for testfilename in testfileset:
 
 	# Final operations.
 	testfile.close()
-	print testfilename + '\t' + str(score_1a) + '\t' +\
-		str(score_1b) + '\t' + str(score_1c) + '\t' + str(score_3a)
+	#print testfilename + '\t' + str(score_1a) + '\t' +\
+	#	str(score_1b) + '\t' + str(score_1c) + '\t' + str(score_3a)
+	print score_1b
