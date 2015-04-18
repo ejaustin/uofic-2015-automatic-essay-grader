@@ -15,6 +15,14 @@ DEBUG = 1
 present_verbs = {'VBG','VBP','VBZ'}
 past_verbs = {'VBD','VBN'}
 
+singular_noun = ["NN", "NNP"]
+plural_noun = ["NNS", "NNPS"]
+
+singular_verb = "VBZ"
+plural_verb = "VBP"
+modals = ["can", "cant", "couldn't", "could", "may", "might", "will",\
+        "won't", "would", "wouldn't", "must", "shall", "should"]
+
 
 def debug(out):
 	if DEBUG:
@@ -54,13 +62,41 @@ def spelling_mistakes(tokens):
 
 
 # Verb Agreement 1b
-
+#Param: Test data tokens
+# Return: number (correctness value)
+def verb_agreement(tokens):
+	num_verbs = 0
+	errors = 0
+	# Tag the tokens.
+	lexical_tag_list = pos_tag(tokens)
+	# Collect pos tags from tagged tokens.
+	pos_tags = [tag[1] for tag in lexical_tag_list]
+	length = len(pos_tags)
+	for index in range(length-1):
+	    # We want to count the total number of verbs in the text
+	    if pos_tags[index] == singular_verb or pos_tags[index] == plural_verb:
+	    	num_verbs += 1
+	    # If there is a modal verb such as can, may or might, we need to
+	    # have a verb in the base form without any inflection.
+	    # (Below) Because plural verbs in English have no inflection.
+	    if tokens[index] in modals and pos_tags[index + 1] != "VB":
+	        errors += 1
+	    # If the noun or pronoun is singular in number but followed by a
+	    # plural verb, we increment the number of errors.
+	    if pos_tags[index] in singular_noun or tokens[index] == 'he' or tokens[index] == 'she' or tokens[index] == 'it':
+		if pos_tags[index + 1] == plural_verb:
+			errors += 1
+	    # Else if the noun or pronoun is plural and followed with a singular verb,
+	    # we increment the number of errors
+	    elif pos_tags[index] in plural_noun and pos_tags[index + 1] == singular_verb:
+			errors += 1
+	return errors / float(num_verbs)
 
 # Verb Tense 1c
 # Param: Test data tokens
 # Return: number (correctness value)
 def verb_tense(tokens):
-	# Tagg the tokens.
+	# Tag the tokens.
 	pos_tuples = pos_tag(tokens)
 	# Collect verb tags from pos tuples.
 	verb_tags = [t[1] for t in pos_tuples if t[1] in present_verbs or t[1] in past_verbs]
@@ -100,9 +136,11 @@ for testfilename in testfileset:
 
 	# Check spelling mistakes.
 	score_1a = spelling_mistakes(tokens)
+	# Check verb agreement.
+	score_1b = verb_agreement(tokens)
 	# Check verb tense agreement.
 	score_1c = verb_tense(tokens)
 
 	# Final operations.
 	testfile.close()
-	print testfilename + '\t' + str(score_1a) + '\t' + str(score_1c)
+	print testfilename + '\t' + str(score_1a) + '\t' + str(score_1b) + '\t' + str(score_1c)
