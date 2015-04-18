@@ -1,9 +1,11 @@
 import nltk
 import os
+import re
 import sys
 from nltk import pos_tag
 from nltk import word_tokenize
 from nltk.corpus import wordnet
+from nltk.tokenize import sent_tokenize
 
 
 # ToDo: Record results for each data in the dataset.
@@ -90,7 +92,8 @@ def verb_agreement(tokens):
 	    # we increment the number of errors
 	    elif pos_tags[index] in plural_noun and pos_tags[index + 1] == singular_verb:
 			errors += 1
-	return errors / float(num_verbs)
+	correctness = 1-(errors/float(num_verbs))
+	return correctness
 
 # Verb Tense 1c
 # Param: Test data tokens
@@ -118,8 +121,19 @@ def verb_tense(tokens):
 
 
 # Number of sentences and length 3a
-def n_of_sentences(testfilename):
-	return
+# Param: Test data. Not tokenized.
+# Return: Lexical richness of the document (lengths of sentences).
+def n_of_sentences(data):
+	# The words must contain letters or digits
+	nonPunct = re.compile('.*[A-Za-z0-9].*')
+	# Tokenize data for sentences.
+	sents = sent_tokenize(data)
+	tokens_raw = word_tokenize(data)
+	# Count the number of words.
+	filtered_words = [w for w in tokens_raw if nonPunct.match(w)]
+	num_sents = len(sents)
+	num_words = len(filtered_words)
+	return num_words/float(num_sents)
 
 ''' Code execute block. '''
 ## Get list of tokenized test files.
@@ -134,13 +148,16 @@ for testfilename in testfileset:
 	data = testfile.read();
 	tokens = word_tokenize(data)
 
-	# Check spelling mistakes.
+	# Check the spelling mistakes.
 	score_1a = spelling_mistakes(tokens)
-	# Check verb agreement.
+	# Check the verb agreement.
 	score_1b = verb_agreement(tokens)
-	# Check verb tense agreement.
+	# Check the verb tense agreement.
 	score_1c = verb_tense(tokens)
+	# Count the number of sentences.
+	score_3a = n_of_sentences(data)
 
 	# Final operations.
 	testfile.close()
-	print testfilename + '\t' + str(score_1a) + '\t' + str(score_1b) + '\t' + str(score_1c)
+	print testfilename + '\t' + str(score_1a) + '\t' +\
+		str(score_1b) + '\t' + str(score_1c) + '\t' + str(score_3a)
