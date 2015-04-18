@@ -99,24 +99,38 @@ def verb_agreement(tokens):
 # Param: Test data tokens
 # Return: number (correctness value)
 def verb_tense(tokens):
-	# Tag the tokens.
+	sentences = sent_tokenize(data)
 	pos_tuples = pos_tag(tokens)
 	# Collect verb tags from pos tuples.
-	verb_tags = [t[1] for t in pos_tuples if t[1] in present_verbs or t[1] in past_verbs]
-	# Calculate verb tense correctness.
-	vtlength = len(verb_tags)
-	wrong = total = 0
-	for curr in range(vtlength-1):
-		# Check if present verbs match.
-		if verb_tags[curr] in present_verbs:
-			if verb_tags[curr+1] in past_verbs:
-				wrong += 1
-		# Check if past tense verbs match.
-		if verb_tags[curr] in past_verbs:
-			if verb_tags[curr+1] in present_verbs:
-				wrong += 1
-		total += 1
-	correctness = 1-(wrong/float(total))
+	# Can be used to count total number of verbs
+	verb_tags = [tag[1] for tag in pos_tuples if tag[1] in present_verbs or tag[1] in past_verbs]
+	# We want to count how many of each tense of verb are in the essays.
+	present_tags = [p for p in verb_tags if p in present_verbs]
+	past_tags = [p for p in verb_tags if p in past_verbs]
+	# Here we are creating a list that contains a sentence that has been pos-tagged for each index.
+	# (Below) Tags for a single sentence.
+	sentence_tags = []
+	# Tags for the whole document.
+	sen = []
+	for sentence in sentences:
+		sentence_tags = pos_tag(word_tokenize(sentence))
+		sen.append(sentence_tags)
+	pres = False
+	past = False
+	inconsistencies = 0
+	for sentence in sen:
+		for word in sentence:
+			# Count the number of present tense verbs and past tense verbs.
+			if word[1] in present_verbs:
+				pres = True
+			if word[1] in past_verbs:
+				past = True
+		# Add one to inconsistencies if a sentence has both past and present tense.
+		if pres and past:
+			inconsistencies += 1
+			pres = False
+			past = False
+	correctness = 1-(inconsistencies/float(len(sen)))
 	return correctness
 
 
