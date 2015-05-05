@@ -204,6 +204,10 @@ def n_of_sentences(data):
 	return num_words/float(num_sents)
 
 
+def text_coherence():
+	return
+
+
 ''' Main code block. '''
 ## Get list of tokenized test files.
 ## Expected path: '../input/test/tokenized'
